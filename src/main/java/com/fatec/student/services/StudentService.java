@@ -1,11 +1,15 @@
 package com.fatec.student.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fatec.student.dto.StudentRequest;
+import com.fatec.student.dto.StudentResponse;
 import com.fatec.student.entities.Student;
+import com.fatec.student.mappers.StudentMapper;
 import com.fatec.student.repositories.StudentRepository;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -16,14 +20,16 @@ public class StudentService {
     @Autowired
     private StudentRepository studentRepository;
 
-    public List<Student> getStudents() {
-        return this.studentRepository.findAll();
+    public List<StudentResponse> getStudents() {
+        List <Student> students = this.studentRepository.findAll();
+        return students.stream().map(s -> StudentMapper.toDTO(s)).collect(Collectors.toList());
     }
 
-    public Student getStudentById(int id) {
-        return this.studentRepository.findById(id).orElseThrow(
+    public StudentResponse getStudentById(int id) {
+        Student student = this.studentRepository.findById(id).orElseThrow(
             () -> new EntityNotFoundException("Aluno não cadastrado!")
         );
+        return StudentMapper.toDTO(student);
     }
 
     public void deleteStudentById(int id){
@@ -34,15 +40,16 @@ public class StudentService {
         }
     }
     
-    public Student saveStudent(Student student){
-        return this.studentRepository.save(student);
+    public StudentResponse saveStudent(StudentRequest request){
+        Student student = StudentMapper.toEntity(request);
+        return StudentMapper.toDTO(this.studentRepository.save(student));
     }
 
-    public void updateStudent(int id, Student student){
+    public void updateStudent(int id, StudentRequest student){
         try {
             Student aux = this.studentRepository.getReferenceById(id);
-            aux.setCourse(student.getCourse());
-            aux.setName(student.getName());
+            aux.setCourse(student.course());
+            aux.setName(student.name());
             this.studentRepository.save(aux);
         } catch (EntityNotFoundException e) {
             throw new EntityNotFoundException("Aluno não cadastrado!");

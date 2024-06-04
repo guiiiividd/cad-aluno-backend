@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.fatec.student.entities.Student;
+import com.fatec.student.dto.StudentRequest;
+import com.fatec.student.dto.StudentResponse;
 import com.fatec.student.services.StudentService;
 
 @RestController
@@ -26,12 +27,12 @@ public class StudentController {
     private StudentService studentService;
 
     @GetMapping
-    public ResponseEntity<List<Student>> getStudents() {
+    public ResponseEntity<List<StudentResponse>> getStudents() {
         return ResponseEntity.ok(studentService.getStudents());
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable int id) {
+    public ResponseEntity<StudentResponse> getStudentById(@PathVariable int id) {
         return ResponseEntity.ok(studentService.getStudentById(id));
     }
 
@@ -42,18 +43,18 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Student> saveStudent(@RequestBody Student student) {
-        Student newStudent = this.studentService.saveStudent(student);
+    public ResponseEntity<StudentResponse> saveStudent(@RequestBody StudentRequest student) {
+        StudentResponse newStudent = this.studentService.saveStudent(student);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(newStudent.getId())
+                .buildAndExpand(newStudent.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(newStudent);
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody Student student) {
+    public ResponseEntity<Void> update(@PathVariable int id, @RequestBody StudentRequest student) {
         this.studentService.updateStudent(id, student);
         return ResponseEntity.noContent().build();
     }
